@@ -21,3 +21,6 @@ If I wanted to add Maretron Slave Response PGN 126720, I would go to pgn.h and s
 ![Manufacturer Code](https://user-images.githubusercontent.com/30420708/76559374-0a957000-646d-11ea-9d9a-51bc3baa144a.png)
 
 ## Configuration - Advanced
+Some PGNs may have additional data that we do not want to import or may be used for source identification in the path.
+
+![Advanced - Single Field](https://user-images.githubusercontent.com/30420708/76570875-41c34b80-6484-11ea-8779-29da53c26134.png)
