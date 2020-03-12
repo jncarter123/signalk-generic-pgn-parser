@@ -1,0 +1,15 @@
+{
+  "name": "signalk-generic-pgn-parser",
+  "version": "1.0.0",
+  "description": "Allows users to parse PGNs that are not directly supported by SignalK.",
+  "main": "index.js",
+  "keywords": [
+    "signalk-node-server-plugin"
+  ],
+  "author": "Jeremy Carter",
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "^4.17.4"
+  },
+  "repository": "https://github.com/jncarter123/signalk-generic-pgn-parser"
+}
