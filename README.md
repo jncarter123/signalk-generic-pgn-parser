@@ -27,4 +27,4 @@ Some PGNs may have additional data that we do not want to import or may be used 
 
 You may also specify multiple fields using a comma seperated list. 
 
-![Advanced - Multiple Fields](https://user-images.githubusercontent.com/30420708/76579274-83aabc80-6499-11ea-964d-bc856907256d.png)
+![Advanced - Multiple Fields](https://user-images.githubusercontent.com/30420708/76579409-1ea39680-649a-11ea-951d-5446fff752ac.png)
