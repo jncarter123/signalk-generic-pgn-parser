@@ -24,3 +24,7 @@ If I wanted to add Maretron Slave Response PGN 126720, I would go to pgn.h and s
 Some PGNs may have additional data that we do not want to import or may be used for source identification in the path.
 
 ![Advanced - Single Field](https://user-images.githubusercontent.com/30420708/76570875-41c34b80-6484-11ea-8779-29da53c26134.png)
+
+You may also specify multiple fields using a comma seperated list. 
+
+![Advanced - Multiple Fields](https://user-images.githubusercontent.com/30420708/76579274-83aabc80-6499-11ea-964d-bc856907256d.png)
