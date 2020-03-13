@@ -14,7 +14,7 @@ For example if I want to include the instance in the PGN 65005, then I could use
 ![Basic Configuration](https://user-images.githubusercontent.com/30420708/76558583-8b536c80-646b-11ea-8cad-eddc7d9dbfb1.png)
 
 ## Configuration - Proprietary
-If the PGN you wish to use is proprietary to a manufacturer, then you need to provide the manufacturer name as used in [pgn.h]. https://github.com/canboat/canboat/blob/master/analyzer/pgn.h
+If the PGN you wish to use is proprietary to a manufacturer, then you need to provide the manufacturer name as used in [pgn.h](https://github.com/canboat/canboat/blob/master/analyzer/pgn.h).
 
 If I wanted to add Maretron Slave Response PGN 126720, I would go to pgn.h and search for the PGN. Within the PGN I would look for the Manufacturer Code and enter it into the PGN config in the plugin.
 
