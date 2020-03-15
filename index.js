@@ -51,7 +51,6 @@ module.exports = function(app) {
     n2kCallback = (msg) => {
       try {
         if (options.pgns && options.pgns.length > 0) {
-
           let fields = msg['fields']
 
           let details = options.pgns.find(({
@@ -63,7 +62,9 @@ module.exports = function(app) {
             let keys = []
             if (details.fields && details.fields.length > 0) {
               keys = details.fields.split(",").map(field => field.trim())
-            }
+            } else {
+              keys = Object.keys(fields) 
+	    }
 
             let basePath = replace(details.basePath, fields, msg.src)
 
@@ -86,19 +87,11 @@ module.exports = function(app) {
   return plugin;
 
   function handleDelta(fields, keys, basePath) {
-
-    let values = []
-    if (keys.length > 0) {
-      values = (keys.map(key => ({
-        "path": basePath + '.' + toCamelCase(key),
-        "value": fields.hasOwnProperty(key) ? fields[key] : ''
-      })))
-    } else {
-      values = (Object.keys(fields).map(key => ({
-        "path": basePath + '.' + toCamelCase(key),
-        "value": fields.hasOwnProperty(key) ? fields[key] : ''
-      })))
-    }
+    
+    let values = (keys.map(key => ({
+      "path": basePath + '.' + toCamelCase(key),
+      "value": fields.hasOwnProperty(key) ? fields[key] : ''
+    })))
 
     let delta = {
       "updates": [{
@@ -112,16 +105,16 @@ module.exports = function(app) {
 
   function replace(template, fields, src) {
     //pull out the field name enclosed in {}
-    let replacementArray = template.match(/{(.*?)}/ig);
+    let replacementArray = template.match(/{(.*?)}/ig)
 
     for (let i = 0; i < replacementArray.length; i++) {
-      let name = replacementArray[i].slice(1, -1);
+      let name = replacementArray[i].slice(1, -1)
 
-      let value = '';
+      let value = ''
       if (fields.hasOwnProperty(name)) {
-        value = fields[name];
+        value = toCamelCase(fields[name])
       } else if (name.includes('Instance')) {
-        app.debug('looking for instance')
+        app.debug('looking for data instance')
         value = findValueByIncludes(fields, 'Instance')
         if (value === false) {
           value = getDeviceInstance(src)
@@ -135,7 +128,7 @@ module.exports = function(app) {
       }
 
       //replace all the occurences with the property value
-      template = template.replace(new RegExp(replacementArray[i], 'g'), value);
+      template = template.replace(new RegExp(replacementArray[i], 'g'), value)
     }
     return template;
   }
@@ -144,31 +137,34 @@ module.exports = function(app) {
     for (var property in object) {
       if (object.hasOwnProperty(property) &&
         property.toString().includes(search)) {
-        return object[property];
+        return object[property]
       }
     }
     return false
   }
 
   function toCamelCase(input) {
+    if (typeof input === 'string') {
+      let regex = /[A-Z\xC0-\xD6\xD8-\xDE]?[a-z\xDF-\xF6\xF8-\xFF]+|[A-Z\xC0-\xD6\xD8-\xDE]+(?![a-z\xDF-\xF6\xF8-\xFF])|\d+/g
+      let inputArray = input.match(regex)
 
-    let regex = /[A-Z\xC0-\xD6\xD8-\xDE]?[a-z\xDF-\xF6\xF8-\xFF]+|[A-Z\xC0-\xD6\xD8-\xDE]+(?![a-z\xDF-\xF6\xF8-\xFF])|\d+/g;
-    let inputArray = input.match(regex);
+      let result = ""
+      for (let i = 0, len = inputArray.length; i < len; i++) {
 
-    let result = "";
-    for (let i = 0, len = inputArray.length; i < len; i++) {
+        let currentStr = inputArray[i]
+        let tempStr = currentStr.toLowerCase()
 
-      let currentStr = inputArray[i];
-      let tempStr = currentStr.toLowerCase();
+        if (i != 0) {
+          tempStr = tempStr.substr(0, 1).toUpperCase() + tempStr.substr(1)
+        }
 
-      if (i != 0) {
-        tempStr = tempStr.substr(0, 1).toUpperCase() + tempStr.substr(1);
+        result += tempStr
       }
 
-      result += tempStr;
+      return result
+    } else {
+      return input
     }
-
-    return result;
   }
 
   function getDeviceInstance(src) {
@@ -180,12 +176,17 @@ module.exports = function(app) {
         if (typeof v === 'object') {
           _.keys(v).forEach(id => {
             if (v[id] && v[id].n2k && v[id].n2k.src == src.toString()) {
-              //The combination of fields 3 & 4 make up the 8 bit NMEA Instance.
-              let lower = v[id].n2k.deviceInstanceLower.toString(2)
-              let upper = v[id].n2k.deviceInstanceUpper.toString(2)
+              if(v[id].n2k.deviceInstanceLower && v[id].n2k.deviceInstanceUpper){ 
+	        //The combination of fields 3 & 4 make up the 8 bit NMEA Instance.
+                let lower = v[id].n2k.deviceInstanceLower.toString(2)
+                let upper = v[id].n2k.deviceInstanceUpper.toString(2)
 
-              deviceInstance = parseInt(upper + lower, 2)
-              app.debug('Found deviceInstance ' + deviceInstance)
+                deviceInstance = parseInt(upper + lower, 2)
+                app.debug('Found deviceInstance ' + deviceInstance)
+	      } else {
+		app.debug('device instance is missing from /sources')
+	        deviceInstance = 'deviceInstanceUnknown' 
+	      }
             }
           })
         }
