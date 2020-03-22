@@ -59,16 +59,22 @@ module.exports = function(app) {
 
           if (details && (details.manufacturer == '' || details.manufacturer == fields['Manufacturer Code'])) {
 
-            let keys = []
-            if (details.fields && details.fields.length > 0) {
-              keys = details.fields.split(",").map(field => field.trim())
+            let instance = getInstance(fields, msg.src)
+
+            if (!isNaN(parseInt(instance))) {
+              let basePath = replace(details.basePath, fields, instance)
+
+              let keys = []
+              if (details.fields && details.fields.length > 0) {
+                keys = details.fields.split(",").map(field => field.trim())
+              } else {
+                keys = Object.keys(fields)
+              }
+
+              handleDelta(fields, keys, basePath, msg.src, instance)
             } else {
-              keys = Object.keys(fields) 
-	    }
-
-            let basePath = replace(details.basePath, fields, msg.src)
-
-            handleDelta(fields, keys, basePath)
+              app.error('Instance not found for pgn ' + msg.pgn + ' source ' + msg.src)
+            }
           }
         }
       } catch (e) {
@@ -86,8 +92,8 @@ module.exports = function(app) {
   }
   return plugin;
 
-  function handleDelta(fields, keys, basePath) {
-    
+  function handleDelta(fields, keys, basePath, src, instance) {
+
     let values = (keys.map(key => ({
       "path": basePath + '.' + toCamelCase(key),
       "value": fields.hasOwnProperty(key) ? fields[key] : ''
@@ -98,12 +104,12 @@ module.exports = function(app) {
         "values": values
       }]
     }
-
     app.debug(JSON.stringify(delta))
+
     app.handleMessage(PLUGIN_ID, delta)
   }
 
-  function replace(template, fields, src) {
+  function replace(template, fields, instance) {
     //pull out the field name enclosed in {}
     let replacementArray = template.match(/{(.*?)}/ig)
 
@@ -114,17 +120,10 @@ module.exports = function(app) {
       if (fields.hasOwnProperty(name)) {
         value = toCamelCase(fields[name])
       } else if (name.includes('Instance')) {
-        app.debug('looking for data instance')
-        value = findValueByIncludes(fields, 'Instance')
-        if (value === false) {
-          value = getDeviceInstance(src)
-        } else {
-          value = ''
-          app.debug('replacement not found for ' + name)
-        }
+        value = instance
       } else {
         value = ''
-        app.debug('replacement not found for ' + name)
+        app.error('replacement not found for field ' + name)
       }
 
       //replace all the occurences with the property value
@@ -170,28 +169,36 @@ module.exports = function(app) {
   function getDeviceInstance(src) {
     app.debug('Looking for device instance of ' + src)
     const sources = app.getPath('/sources')
-    let deviceInstance = 0
+    let deviceInstance
     if (sources) {
       _.values(sources).forEach(v => {
         if (typeof v === 'object') {
           _.keys(v).forEach(id => {
             if (v[id] && v[id].n2k && v[id].n2k.src == src.toString()) {
-              if(v[id].n2k.hasOwnProperty('deviceInstanceLower') && v[id].n2k.hasOwnProperty('deviceInstanceUpper')){ 
-	        //The combination of fields 3 & 4 make up the 8 bit NMEA Instance.
+              if (v[id].n2k.hasOwnProperty('deviceInstanceLower') && v[id].n2k.hasOwnProperty('deviceInstanceUpper')) {
+                //The combination of fields 3 & 4 make up the 8 bit NMEA Instance.
                 let lower = v[id].n2k.deviceInstanceLower.toString(2)
                 let upper = v[id].n2k.deviceInstanceUpper.toString(2)
 
                 deviceInstance = parseInt(upper + lower, 2)
                 app.debug('Found deviceInstance ' + deviceInstance)
-	      } else {
-		app.debug('device instance is missing from /sources')
-	        deviceInstance = 'deviceInstanceUnknown' 
-	      }
+              }
             }
           })
         }
       })
       return deviceInstance
+    }
+  }
+
+  function getInstance(fields, src) {
+    let instance = findValueByIncludes(fields, 'Instance')
+    if (!isNaN(parseInt(instance))) {
+      app.debug('Found data instance ' + instance)
+      return instance
+    } else {
+      instance = getDeviceInstance(src)
+      return instance
     }
   }
 };
