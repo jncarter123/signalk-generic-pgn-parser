@@ -175,12 +175,8 @@ module.exports = function(app) {
         if (typeof v === 'object') {
           _.keys(v).forEach(id => {
             if (v[id] && v[id].n2k && v[id].n2k.src == src.toString()) {
-              if (v[id].n2k.hasOwnProperty('deviceInstanceLower') && v[id].n2k.hasOwnProperty('deviceInstanceUpper')) {
-                //The combination of fields 3 & 4 make up the 8 bit NMEA Instance.
-                let lower = v[id].n2k.deviceInstanceLower.toString(2)
-                let upper = v[id].n2k.deviceInstanceUpper.toString(2)
-
-                deviceInstance = parseInt(upper + lower, 2)
+              if (v[id].n2k.hasOwnProperty('deviceInstance')) {
+                deviceInstance = v[id].n2k.deviceInstance
                 app.debug('Found deviceInstance ' + deviceInstance)
               }
             }
