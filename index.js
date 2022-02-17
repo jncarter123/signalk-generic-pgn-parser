@@ -5,6 +5,7 @@ const PLUGIN_NAME = 'Generic PGN Parser'
 
 module.exports = function(app) {
   var plugin = {};
+  var n2kCallback
 
   plugin.id = PLUGIN_ID;
   plugin.name = PLUGIN_NAME;
@@ -112,6 +113,11 @@ module.exports = function(app) {
   function replace(template, fields, instance) {
     //pull out the field name enclosed in {}
     let replacementArray = template.match(/{(.*?)}/ig)
+
+    //if there is nothing to replace in the basePath
+    if(replacementArray == null){
+        return template;
+    }
 
     for (let i = 0; i < replacementArray.length; i++) {
       let name = replacementArray[i].slice(1, -1)
