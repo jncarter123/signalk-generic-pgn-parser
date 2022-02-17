@@ -1,6 +1,6 @@
 {
   "name": "signalk-generic-pgn-parser",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Allows users to parse PGNs that are not directly supported by SignalK.",
   "main": "index.js",
   "keywords": [
