@@ -94,11 +94,34 @@ module.exports = function(app) {
   return plugin;
 
   function handleDelta(fields, keys, basePath, src, instance) {
-
+    /*
     let values = (keys.map(key => ({
       "path": basePath + '.' + toCamelCase(key),
       "value": fields.hasOwnProperty(key) ? fields[key] : ''
     })))
+    */
+    let values = []
+
+    //look at each field of the pgn
+    for (const [key, value] of Object.entries(fields)) {
+      //some PGNs such as 129540 contain a list (array of objects) within the fields
+      if(Array.isArray(value)){
+        value.forEach((item, i) => {
+          for (let prop in item) {
+            values.push({
+              "path": basePath + '.' + toCamelCase(key) + '.' + i + '.' + toCamelCase(prop),
+              "value": item.hasOwnProperty(prop) ? item[prop] : ''
+            })
+          }
+        })
+      } else {
+        //it is a regular field
+        values.push({
+          "path": basePath + '.' + toCamelCase(key),
+          "value": fields.hasOwnProperty(key) ? value : ''
+        })
+      }
+    }
 
     let delta = {
       "updates": [{
