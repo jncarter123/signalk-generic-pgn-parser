@@ -103,10 +103,10 @@ module.exports = function(app) {
     let values = []
 
     //look at each field of the pgn
-    for (const [key, value] of Object.entries(fields)) {
+    for (const key of keys) {
       //some PGNs such as 129540 contain a list (array of objects) within the fields
-      if(Array.isArray(value)){
-        value.forEach((item, i) => {
+      if(Array.isArray(fields[key])){
+        fields[key].forEach((item, i) => {
           for (let prop in item) {
             values.push({
               "path": basePath + '.' + toCamelCase(key) + '.' + i + '.' + toCamelCase(prop),
@@ -118,7 +118,7 @@ module.exports = function(app) {
         //it is a regular field
         values.push({
           "path": basePath + '.' + toCamelCase(key),
-          "value": fields.hasOwnProperty(key) ? value : ''
+          "value": fields.hasOwnProperty(key) ? fields[key] : ''
         })
       }
     }
