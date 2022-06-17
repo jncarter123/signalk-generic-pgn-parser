@@ -13,6 +13,8 @@ For example if I want to include the instance in the PGN 65005, then I could use
 
 ![Basic Configuration](https://user-images.githubusercontent.com/30420708/76558583-8b536c80-646b-11ea-8cad-eddc7d9dbfb1.png)
 
+I can also include the canname which is a hardcoded identifier in the device, similar to a MAC address on a computer. To use this include {canName} in the path template.
+
 ## Configuration - Proprietary
 If the PGN you wish to use is proprietary to a manufacturer, then you need to provide the manufacturer name as used in [pgn.h](https://github.com/canboat/canboat/blob/master/analyzer/pgn.h).
 
@@ -25,6 +27,6 @@ Some PGNs may have additional data that we do not want to import or may be used 
 
 ![Advanced - Single Field](https://user-images.githubusercontent.com/30420708/76570875-41c34b80-6484-11ea-8779-29da53c26134.png)
 
-You may also specify multiple fields using a comma seperated list. 
+You may also specify multiple fields using a comma seperated list.
 
 ![Advanced - Multiple Fields](https://user-images.githubusercontent.com/30420708/76579409-1ea39680-649a-11ea-951d-5446fff752ac.png)
