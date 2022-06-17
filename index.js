@@ -63,7 +63,7 @@ module.exports = function(app) {
             let instance = getInstance(fields, msg.src)
 
             if (!isNaN(parseInt(instance))) {
-              let basePath = replace(details.basePath, fields, instance)
+              let basePath = replace(details.basePath, fields, instance, msg.src)
 
               let keys = []
               if (details.fields && details.fields.length > 0) {
@@ -133,7 +133,7 @@ module.exports = function(app) {
     app.handleMessage(PLUGIN_ID, delta)
   }
 
-  function replace(template, fields, instance) {
+  function replace(template, fields, instance, src) {
     //pull out the field name enclosed in {}
     let replacementArray = template.match(/{(.*?)}/ig)
 
@@ -150,6 +150,10 @@ module.exports = function(app) {
         value = toCamelCase(fields[name])
       } else if (name.includes('Instance')) {
         value = instance
+      } else if (name.includes('Source')) {
+        value = src.toString()
+      } else if (name.includes('canName')) {
+        value = getDeviceProperty(src, 'canName')
       } else {
         value = ''
         app.error('replacement not found for field ' + name)
@@ -195,24 +199,24 @@ module.exports = function(app) {
     }
   }
 
-  function getDeviceInstance(src) {
-    app.debug('Looking for device instance of ' + src)
+  function getDeviceProperty(src, property) {
+    app.debug('Looking for device property of ' + src)
     const sources = app.getPath('/sources')
-    let deviceInstance
+    let value
     if (sources) {
       _.values(sources).forEach(v => {
         if (typeof v === 'object') {
           _.keys(v).forEach(id => {
             if (v[id] && v[id].n2k && v[id].n2k.src == src.toString()) {
-              if (v[id].n2k.hasOwnProperty('deviceInstance')) {
-                deviceInstance = v[id].n2k.deviceInstance
-                app.debug('Found deviceInstance ' + deviceInstance)
+              if (v[id].n2k.hasOwnProperty(property)) {
+                value = v[id].n2k[property]
+                app.debug('Found property ' + value)
               }
             }
           })
         }
       })
-      return deviceInstance
+      return value
     }
   }
 
@@ -222,7 +226,7 @@ module.exports = function(app) {
       app.debug('Found data instance ' + instance)
       return instance
     } else {
-      instance = getDeviceInstance(src)
+      instance = getDeviceProperty(src, 'deviceInstance')
       return instance
     }
   }
